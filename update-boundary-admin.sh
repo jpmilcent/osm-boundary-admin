@@ -2,7 +2,8 @@
 # Encoding : UTF-8
 
 TIME_START=$(date +%s)
-DIR_BASE=$(dirname $0)
+#DIR_BASE=$(dirname $0)
+DIR_BASE=`pwd`
 
 # Functions
 function ageEnSeconde {
@@ -59,6 +60,7 @@ fi
 
 # Check if the ogr2ogr was built with support of Mysql and OSM
 if [ ! -f ${DIR_BIN_OGR}/ogr2ogr ] &&	 [ ! -f ${DIR_BIN_OGR}/ogrinfo ] ; then
+	echo ${DIR_BIN_OGR}/ogr2ogr
 	echo -e "${Red}Please build a Gdal version with MySQL and OSM support.${RCol}"
 	exit;
 else

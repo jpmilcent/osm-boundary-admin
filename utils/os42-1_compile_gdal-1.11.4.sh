@@ -1,11 +1,14 @@
 #!/bin/bash
 # Encodage : UTF-8
-# Compilation de Gdal 1.10 pour Debian 6
-# Copyright Jean-Pascal Milcent 2014
+# Compilation de Gdal 1.11 pour OpenSuse 42.1
+# Copyright Jean-Pascal Milcent 2016
 # Licence de ce script : GPL v3 & CeCILL v2
 #
 # Log des modifications de ce script :
-# 2014-04-17 [Jean-Pascal MILCENT] : Creation du script Gdal v 1.10
+# 2016-04-08 [Jean-Pascal MILCENT] : Mise à jour du script : Gdal v 1.11, OpenSuse 42.1
+# 2014-04-11 [Jean-Pascal MILCENT] : Creation du script Gdal v 1.10
+
+DIR_BASE=`pwd`
 
 # Load config
 if [ -f ./../config.cfg ] ; then
@@ -16,7 +19,7 @@ else
 fi
 
 echo -e "${Gre}Installation des paquets pour les librairies standards :${RCol}"
-sudo apt-get install libxml2-dev libexpat-dev libsqlite3-dev libpcre3 libpcre3-dev
+sudo zypper in libxml2-devel libexpat-devel sqlite3-devel pcre-devel
 
 echo -e "${Gre}Création des dossiers pour la compilation${RCol}"
 if [ ! -d ${GDAL_BUILD_DIR}/src ] ; then
@@ -28,6 +31,7 @@ fi
 
 echo -e "${Gre}Récupération des sources à compiler :${RCol}"
 cd ${GDAL_BUILD_DIR}/src/targz
+echo `pwd`
 if [ ! -f gdal-${GDAL_VERSION}.tar.gz ] ; then
 	wget $GDAL_URL_DOWNLOAD -O gdal-${GDAL_VERSION}.tar.gz
 fi
@@ -59,10 +63,19 @@ echo -e "${Gre}Configuration, compilation et installation :${RCol}"
 	--with-xml2 \
 	--with-sqlite3=yes \
 	--with-pcre \
-	--with-mysql=$MYSQL_CONFIG
+	--with-mysql=$MYSQL_CONFIG \
+	--with-fgdb=${GDAL_BUILD_DIR}/src/FileGDB_API-64
 
 make
 make install
+
+echo -e "${Gre}Copie des lib FileGDB dans le dossier lib de gdal :${RCol}"
+cd ${GDAL_INSTALL_DIR}/gdal-${GDAL_VERSION}/lib64
+cp ${GDAL_BUILD_DIR}/src/FileGDB_API-64/lib/libFileGDBAPI.so ./libFileGDBAPI.so
+cp ${GDAL_BUILD_DIR}/src/FileGDB_API-64/lib/libfgdbunixrtl.so ./libfgdbunixrtl.so
+
+echo -e "${Gre}Ajout de liens symboliques vers les lib manquantes :${RCol}"
+ln -s /usr/lib64/libstdc++.so.6 libstdc++.so.6
 
 echo -e "${Gre}Gdal est en version :${RCol}"
 cd ${GDAL_INSTALL_DIR}/gdal-${GDAL_VERSION}/bin/gdal-config --version
